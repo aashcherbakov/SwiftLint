@@ -44,6 +44,7 @@ class RulesTests: XCTestCase {
         ("testTypeName", self.testTypeName),
         ("testValidDocs", self.testValidDocs),
         ("testVariableName", self.testVariableName),
+        ("testAlphabeticalImports", self.testAlphabeticalImports),
     ]
 
     func testClosingBrace() {
@@ -170,5 +171,9 @@ class RulesTests: XCTestCase {
 
     func testVariableName() {
         verifyRule(VariableNameRule.description)
+    }
+
+    func testAlphabeticalImports() {
+        verifyRule(AlphabeticalImportRule.description)
     }
 }
