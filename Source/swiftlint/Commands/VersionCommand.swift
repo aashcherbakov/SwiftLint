@@ -6,8 +6,8 @@
 //  Copyright (c) 2015 Realm. All rights reserved.
 //
 
-import Foundation
 import Commandant
+import Foundation
 import Result
 
 private let version = NSBundle(identifier: "io.realm.SwiftLintFramework")!
