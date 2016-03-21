@@ -1,4 +1,4 @@
-## Master
+## 0.9.2: Multiple Exhaust Codes
 
 ##### Breaking
 
@@ -6,13 +6,34 @@
 
 ##### Enhancements
 
-* None.
+* Return different exit codes to distinguish between types of errors:
+  * 0: No errors, maybe warnings in non-strict mode
+  * 1: Usage or system error
+  * 2: Style violations of severity "Error"
+  * 3: No style violations of severity "Error", but violations of severity
+       "warning" with `--strict`  
+  [JP Simard](https://github.com/jpsim)
+  [#166](https://github.com/realm/SwiftLint/issues/166)
+
+* `VariableNameRule` now accepts symbols starting with more than one uppercase
+  letter to allow for names like XMLString or MIMEType.  
+  [Erik Aigner](https://github.com/eaigner)
+  [#566](https://github.com/realm/SwiftLint/issues/566)
 
 ##### Bug Fixes
+
+* Avoid overwriting files whose contents have not changed.  
+  [Neil Gall](https://github.com/neilgall)
+  [#574](https://github.com/realm/SwiftLint/issues/574)
 
 * Fix `CommaRule` mismatch between violations and corrections.  
   [Norio Nomura](https://github.com/norio-nomura)
   [#466](https://github.com/realm/SwiftLint/issues/466)
+
+* Fix more false positives in `ForceUnwrappingRule`.  
+  [Norio Nomura](https://github.com/norio-nomura)
+  [#546](https://github.com/realm/SwiftLint/issues/546)
+  [#547](https://github.com/realm/SwiftLint/issues/547)
 
 ## 0.9.1: Air Duct Cleaning
 
