@@ -20,8 +20,8 @@ public struct FunctionBodyLengthRule: ASTRule, ConfigurationProviderRule {
     )
 
     public func validateFile(file: File,
-        kind: SwiftDeclarationKind,
-        dictionary: [String: SourceKitRepresentable]) -> [StyleViolation] {
+                             kind: SwiftDeclarationKind,
+                             dictionary: [String: SourceKitRepresentable]) -> [StyleViolation] {
         let functionKinds: [SwiftDeclarationKind] = [
             .FunctionAccessorAddress,
             .FunctionAccessorDidset,
@@ -42,15 +42,16 @@ public struct FunctionBodyLengthRule: ASTRule, ConfigurationProviderRule {
             return []
         }
         if let offset = (dictionary["key.offset"] as? Int64).flatMap({ Int($0) }),
-            let bodyOffset = (dictionary["key.bodyoffset"] as? Int64).flatMap({ Int($0) }),
-            let bodyLength = (dictionary["key.bodylength"] as? Int64).flatMap({ Int($0) }) {
+            bodyOffset = (dictionary["key.bodyoffset"] as? Int64).flatMap({ Int($0) }),
+            bodyLength = (dictionary["key.bodylength"] as? Int64).flatMap({ Int($0) }) {
             let startLine = file.contents.lineAndCharacterForByteOffset(bodyOffset)
             let endLine = file.contents.lineAndCharacterForByteOffset(bodyOffset + bodyLength)
 
-            if let startLine = startLine?.line, let endLine = endLine?.line {
+            if let startLine = startLine?.line, endLine = endLine?.line {
                 for parameter in configuration.params {
                     let (exceeds, lineCount) = file.exceedsLineCountExcludingCommentsAndWhitespace(
-                                                                startLine, endLine, parameter.value)
+                        startLine, endLine, parameter.value
+                    )
                     if exceeds {
                         return [StyleViolation(ruleDescription: self.dynamicType.description,
                             severity: parameter.severity,

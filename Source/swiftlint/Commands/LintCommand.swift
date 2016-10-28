@@ -32,7 +32,7 @@ struct LintCommand: CommandType {
         var ruleTimes = [(id: String, time: Double)]()
         var violations = [StyleViolation]()
         let configuration = Configuration(commandLinePath: options.configurationFile,
-            rootPath: options.path, quiet: options.quiet)
+                                          rootPath: options.path, quiet: options.quiet)
         let reporter = reporterFromString(
             options.reporter.isEmpty ? configuration.reporter : options.reporter
         )
@@ -55,6 +55,10 @@ struct LintCommand: CommandType {
             violations += currentViolations
             reporter.reportViolations(currentViolations, realtimeCondition: true)
         }.flatMap { files in
+            if isWarningThresholdBroken(configuration, violations: violations) {
+                violations.append(createThresholdViolation(configuration.warningThreshold!))
+                reporter.reportViolations([violations.last!], realtimeCondition: true)
+            }
             reporter.reportViolations(violations, realtimeCondition: false)
             let numberOfSeriousViolations = violations.filter({ $0.severity == .Error }).count
             if !options.quiet {
@@ -105,20 +109,37 @@ struct LintOptions: OptionsType {
         // swiftlint:enable line_length
         return create
             <*> mode <| pathOption(action: "lint")
-            <*> mode <| Option(key: "use-stdin",
-                defaultValue: false,
-                usage: "lint standard input")
+            <*> mode <| Option(key: "use-stdin", defaultValue: false,
+                               usage: "lint standard input")
             <*> mode <| configOption
-            <*> mode <| Option(key: "strict",
-                defaultValue: false,
-                usage: "fail on warnings")
+            <*> mode <| Option(key: "strict", defaultValue: false,
+                               usage: "fail on warnings")
             <*> mode <| useScriptInputFilesOption
-            <*> mode <| Option(key: "benchmark",
-                defaultValue: false,
-                usage: "save benchmarks to benchmark_files.txt and benchmark_rules.txt")
-            <*> mode <| Option(key: "reporter",
-                defaultValue: "",
-                usage: "the reporter used to log errors and warnings")
+            <*> mode <| Option(key: "benchmark", defaultValue: false,
+                               usage: "save benchmarks to benchmark_files.txt " +
+                                      "and benchmark_rules.txt")
+            <*> mode <| Option(key: "reporter", defaultValue: "",
+                               usage: "the reporter used to log errors and warnings")
             <*> mode <| quietOption(action: "linting")
     }
+}
+
+private func isWarningThresholdBroken(configuration: Configuration,
+                                      violations: [StyleViolation]) -> Bool {
+    guard let warningThreshold = configuration.warningThreshold else { return false }
+    let numberOfWarningViolations = violations.filter({ $0.severity == .Warning }).count
+    return numberOfWarningViolations >= warningThreshold
+}
+
+private func createThresholdViolation(threshold: Int) -> StyleViolation {
+    let description = RuleDescription(
+        identifier: "warning_threshold",
+        name: "Warning Threshold",
+        description: "Number of warnings thrown is above the threshold."
+    )
+    return StyleViolation(
+        ruleDescription: description,
+        severity: .Error,
+        location: Location(file: "", line: 0, character: 0),
+        reason: "Number of warnings exceeded threshold of \(threshold).")
 }

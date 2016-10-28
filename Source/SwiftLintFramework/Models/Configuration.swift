@@ -20,6 +20,7 @@ private enum ConfigurationKey: String {
     case Reporter = "reporter"
     case UseNestedConfigs = "use_nested_configs" // deprecated
     case WhitelistRules = "whitelist_rules"
+    case WarningThreshold = "warning_threshold"
 }
 
 public struct Configuration: Equatable {
@@ -27,6 +28,7 @@ public struct Configuration: Equatable {
     public let included: [String]             // included
     public let excluded: [String]             // excluded
     public let reporter: String               // reporter (xcode, json, csv, checkstyle)
+    public var warningThreshold: Int?         // warning threshold
     public let rules: [Rule]
     public var rootPath: String?              // the root path to search for nested configurations
     public var configurationPath: String?     // if successfully loaded from a path
@@ -36,6 +38,7 @@ public struct Configuration: Equatable {
                  whitelistRules: [String] = [],
                  included: [String] = [],
                  excluded: [String] = [],
+                 warningThreshold: Int? = nil,
                  reporter: String = XcodeReporter.identifier,
                  configuredRules: [Rule] = masterRuleList.configuredRulesWithDictionary([:])) {
         self.included = included
@@ -47,7 +50,7 @@ public struct Configuration: Equatable {
             $0.dynamicType.description.identifier
         }
 
-        let validDisabledRules = disabledRules.filter({ validRuleIdentifiers.contains($0)})
+        let validDisabledRules = disabledRules.filter({ validRuleIdentifiers.contains($0) })
         let invalidRules = disabledRules.filter({ !validRuleIdentifiers.contains($0) })
         if !invalidRules.isEmpty {
             for invalidRule in invalidRules {
@@ -71,6 +74,9 @@ public struct Configuration: Equatable {
             }.joinWithSeparator("\n"))
             return nil
         }
+
+        // set the config threshold to the threshold provided in the config file
+        self.warningThreshold = warningThreshold
 
         // white_list rules take precendence over all else.
         if !whitelistRules.isEmpty {
@@ -127,7 +133,8 @@ public struct Configuration: Equatable {
             .OptInRules,
             .Reporter,
             .UseNestedConfigs,
-            .WhitelistRules,
+            .WarningThreshold,
+            .WhitelistRules
         ].map({ $0.rawValue }) + masterRuleList.list.keys
 
         let invalidKeys = Set(dict.keys).subtract(validKeys)
@@ -141,6 +148,7 @@ public struct Configuration: Equatable {
             whitelistRules: defaultStringArray(dict[ConfigurationKey.WhitelistRules.rawValue]),
             included: defaultStringArray(dict[ConfigurationKey.Included.rawValue]),
             excluded: defaultStringArray(dict[ConfigurationKey.Excluded.rawValue]),
+            warningThreshold: dict[ConfigurationKey.WarningThreshold.rawValue] as? Int,
             reporter: dict[ConfigurationKey.Reporter.rawValue] as? String ??
                 XcodeReporter.identifier,
             configuredRules: masterRuleList.configuredRulesWithDictionary(dict)
@@ -150,16 +158,18 @@ public struct Configuration: Equatable {
     public init(path: String = Configuration.fileName, rootPath: String? = nil,
                 optional: Bool = true, quiet: Bool = false) {
         let fullPath = (path as NSString).absolutePathRepresentation()
-        let fail = { fatalError("Could not read configuration file at path '\(fullPath)'") }
+        let fail = { (msg: String) in
+            fatalError("Could not read configuration file at path '\(fullPath)': \(msg)")
+        }
         if path.isEmpty || !NSFileManager.defaultManager().fileExistsAtPath(fullPath) {
-            if !optional { fail() }
+            if !optional { fail("File not found.") }
             self.init()!
             self.rootPath = rootPath
             return
         }
         do {
             let yamlContents = try NSString(contentsOfFile: fullPath,
-                encoding: NSUTF8StringEncoding) as String
+                                            encoding: NSUTF8StringEncoding) as String
             let dict = try YamlParser.parse(yamlContents)
             if !quiet {
                 queuedPrintError("Loading configuration from '\(path)'")
@@ -168,8 +178,10 @@ public struct Configuration: Equatable {
             configurationPath = fullPath
             self.rootPath = rootPath
             return
+        } catch YamlParserError.YamlParsing(let message) {
+            fail("Error parsing YAML: \(message)")
         } catch {
-            fail()
+            fail("\(error)")
         }
         self.init()!
     }
@@ -177,8 +189,12 @@ public struct Configuration: Equatable {
     public func lintablePathsForPath(path: String,
                                      fileManager: NSFileManager = fileManager) -> [String] {
         let pathsForPath = included.isEmpty ? fileManager.filesToLintAtPath(path) : []
-        let excludedPaths = excluded.flatMap(fileManager.filesToLintAtPath)
-        let includedPaths = included.flatMap(fileManager.filesToLintAtPath)
+        let excludedPaths = excluded.flatMap {
+            fileManager.filesToLintAtPath($0, rootDirectory: self.rootPath)
+        }
+        let includedPaths = included.flatMap {
+            fileManager.filesToLintAtPath($0, rootDirectory: self.rootPath)
+        }
         return (pathsForPath + includedPaths).filter({ !excludedPaths.contains($0) })
     }
 

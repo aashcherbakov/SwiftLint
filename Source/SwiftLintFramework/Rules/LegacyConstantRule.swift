@@ -6,6 +6,7 @@
 //  Copyright © 2016 Realm. All rights reserved.
 //
 
+import Foundation
 import SourceKittenFramework
 
 public struct LegacyConstantRule: CorrectableRule, ConfigurationProviderRule {
@@ -23,6 +24,9 @@ public struct LegacyConstantRule: CorrectableRule, ConfigurationProviderRule {
             "CGPoint.zero",
             "CGRect.zero",
             "CGSize.zero",
+            "NSPoint.zero",
+            "NSRect.zero",
+            "NSSize.zero",
             "CGRect.null"
         ],
         triggeringExamples: [
@@ -30,20 +34,26 @@ public struct LegacyConstantRule: CorrectableRule, ConfigurationProviderRule {
             "↓CGPointZero",
             "↓CGRectZero",
             "↓CGSizeZero",
+            "↓NSZeroPoint",
+            "↓NSZeroRect",
+            "↓NSZeroSize",
             "↓CGRectNull"
         ],
         corrections: [
-            "CGRectInfinite\n": "CGRect.infinite\n",
-            "CGPointZero\n": "CGPoint.zero\n",
-            "CGRectZero\n": "CGRect.zero\n",
-            "CGSizeZero\n": "CGSize.zero\n",
-            "CGRectNull\n": "CGRect.null\n"
+            "↓CGRectInfinite\n": "CGRect.infinite\n",
+            "↓CGPointZero\n": "CGPoint.zero\n",
+            "↓CGRectZero\n": "CGRect.zero\n",
+            "↓CGSizeZero\n": "CGSize.zero\n",
+            "↓NSZeroPoint\n": "NSPoint.zero\n",
+            "↓NSZeroRect\n": "NSRect.zero\n",
+            "↓NSZeroSize\n": "NSSize.zero\n",
+            "↓CGRectInfinite\n↓CGRectNull\n": "CGRect.infinite\nCGRect.null\n"
         ]
     )
 
     public func validateFile(file: File) -> [StyleViolation] {
         let constants = ["CGRectInfinite", "CGPointZero", "CGRectZero", "CGSizeZero",
-            "CGRectNull"]
+                         "NSZeroPoint", "NSZeroRect", "NSZeroSize", "CGRectNull"]
 
         let pattern = "\\b(" + constants.joinWithSeparator("|") + ")\\b"
 
@@ -60,6 +70,9 @@ public struct LegacyConstantRule: CorrectableRule, ConfigurationProviderRule {
             "CGPointZero": "CGPoint.zero",
             "CGRectZero": "CGRect.zero",
             "CGSizeZero": "CGSize.zero",
+            "NSZeroPoint": "NSPoint.zero",
+            "NSZeroRect": "NSRect.zero",
+            "NSZeroSize": "NSSize.zero",
             "CGRectNull": "CGRect.null"
         ]
 
@@ -67,16 +80,18 @@ public struct LegacyConstantRule: CorrectableRule, ConfigurationProviderRule {
         var corrections = [Correction]()
         var contents = file.contents
 
-        for (pattern, template) in patterns {
-            let matches = file.matchPattern(pattern, withSyntaxKinds: [.Identifier])
+        let matches = patterns.map({ pattern, template in
+            file.matchPattern(pattern, withSyntaxKinds: [.Identifier])
+                .map { ($0, pattern, template) }
+        }).flatten().sort { $0.0.location > $1.0.location } // reversed
 
-            let regularExpression = regex(pattern)
-            for range in matches.reverse() {
-                contents = regularExpression.stringByReplacingMatchesInString(contents,
-                    options: [], range: range, withTemplate: template)
-                let location = Location(file: file, characterOffset: range.location)
-                corrections.append(Correction(ruleDescription: description, location: location))
-            }
+        for (range, pattern, template) in matches {
+            contents = regex(pattern).stringByReplacingMatchesInString(contents,
+                                                                       options: [],
+                                                                       range: range,
+                                                                       withTemplate: template)
+            let location = Location(file: file, characterOffset: range.location)
+            corrections.append(Correction(ruleDescription: description, location: location))
         }
 
         file.write(contents)

@@ -11,22 +11,15 @@ import XCTest
 
 class YamlParserTests: XCTestCase {
 
-    // protocol XCTestCaseProvider
-    lazy var allTests: [(String, () throws -> Void)] = [
-        ("testParseEmptyString", self.testParseEmptyString),
-        ("testParseValidString", self.testParseValidString),
-        ("testParseInvalidStringThrows", self.testParseInvalidStringThrows),
-    ]
-
     // swiftlint:disable force_try
     func testParseEmptyString() {
         XCTAssertEqual((try! YamlParser.parse("")).count, 0,
-                        "Parsing empty YAML string should succeed")
+                       "Parsing empty YAML string should succeed")
     }
 
     func testParseValidString() {
         XCTAssertEqual(try! YamlParser.parse("a: 1\nb: 2").count, 2,
-                        "Parsing valid YAML string should succeed")
+                       "Parsing valid YAML string should succeed")
     }
 
     func testParseInvalidStringThrows() {

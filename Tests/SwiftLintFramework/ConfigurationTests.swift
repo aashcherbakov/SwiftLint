@@ -25,32 +25,11 @@ extension Configuration {
 
 class ConfigurationTests: XCTestCase {
 
-    // protocol XCTestCaseProvider
-    lazy var allTests: [(String, () throws -> Void)] = [
-        ("testInit", self.testInit),
-        ("testEmptyConfiguration", self.testEmptyConfiguration),
-        ("testWhitelistRules", self.testWhitelistRules),
-        ("testOtherRuleConfigurationsAlongsideWhitelistRules",
-            self.testOtherRuleConfigurationsAlongsideWhitelistRules),
-        ("testDisabledRules", self.testDisabledRules),
-        ("testDisabledRulesWithUnknownRule", self.testDisabledRulesWithUnknownRule),
-        ("testExcludedPaths", self.testExcludedPaths),
-        ("testIsEqualTo", self.testIsEqualTo),
-        ("testIsNotEqualTo", self.testIsNotEqualTo),
-        ("testMerge", self.testMerge),
-        ("testLevel0", self.testLevel0),
-        ("testLevel1", self.testLevel1),
-        ("testLevel2", self.testLevel2),
-        ("testLevel3", self.testLevel3),
-        ("testConfiguresCorrectlyFromDict", self.testConfiguresCorrectlyFromDict),
-        ("testConfigureFallsBackCorrectly", self.testConfigureFallsBackCorrectly),
-    ]
-
     func testInit() {
         XCTAssert(Configuration(dict: [:]) != nil,
-            "initializing Configuration with empty Dictionary should succeed")
+                  "initializing Configuration with empty Dictionary should succeed")
         XCTAssert(Configuration(dict: ["a": 1, "b": 2]) != nil,
-            "initializing Configuration with valid Dictionary should succeed")
+                  "initializing Configuration with valid Dictionary should succeed")
     }
 
     func testEmptyConfiguration() {
@@ -72,6 +51,16 @@ class ConfigurationTests: XCTestCase {
             $0.dynamicType.description.identifier
         }
         XCTAssertEqual(whitelist, configuredIdentifiers)
+    }
+
+    func testWarningThreshold_value() {
+        let config = Configuration(dict: ["warning_threshold": 5])!
+        XCTAssertEqual(config.warningThreshold, 5)
+    }
+
+    func testWarningThreshold_nil() {
+        let config = Configuration(dict: [:])!
+        XCTAssertEqual(config.warningThreshold, nil)
     }
 
     func testOtherRuleConfigurationsAlongsideWhitelistRules() {
@@ -98,8 +87,8 @@ class ConfigurationTests: XCTestCase {
     func testDisabledRules() {
         let disabledConfig = Configuration(dict: ["disabled_rules":  ["nesting", "todo"]])!
         XCTAssertEqual(disabledConfig.disabledRules,
-            ["nesting", "todo"],
-            "initializing Configuration with valid rules in Dictionary should succeed")
+                       ["nesting", "todo"],
+                       "initializing Configuration with valid rules in Dictionary should succeed")
         let expectedIdentifiers = Array(masterRuleList.list.keys)
             .filter({ !(["nesting", "todo"] + optInRules).contains($0) })
         let configuredIdentifiers = disabledConfig.rules.map {
@@ -119,8 +108,8 @@ class ConfigurationTests: XCTestCase {
         let configuration = Configuration(dict: ["disabled_rules": [validRule, bogusRule]])!
 
         XCTAssertEqual(configuration.disabledRules,
-            [validRule],
-            "initializing Configuration with valid rules in YAML string should succeed")
+                       [validRule],
+                       "initializing Configuration with valid rules in YAML string should succeed")
         let expectedIdentifiers = Array(masterRuleList.list.keys)
             .filter({ !([validRule] + optInRules).contains($0) })
         let configuredIdentifiers = configuration.rules.map {
@@ -130,10 +119,14 @@ class ConfigurationTests: XCTestCase {
     }
 
     private class TestFileManager: NSFileManager {
-        private override func filesToLintAtPath(path: String) -> [String] {
+        private override func filesToLintAtPath(
+            path: String,
+            rootDirectory: String? = nil)
+            -> [String] {
             switch path {
             case "directory": return ["directory/File1.swift", "directory/File2.swift",
-                "directory/excluded/Excluded.swift", "directory/ExcludedFile.swift"]
+                                      "directory/excluded/Excluded.swift",
+                                      "directory/ExcludedFile.swift"]
             case "directory/excluded" : return ["directory/excluded/Excluded.swift"]
             case "directory/ExcludedFile.swift" : return ["directory/ExcludedFile.swift"]
             default: break
@@ -145,7 +138,8 @@ class ConfigurationTests: XCTestCase {
 
     func testExcludedPaths() {
         let configuration = Configuration(included: ["directory"],
-            excluded: ["directory/excluded", "directory/ExcludedFile.swift"])!
+                                          excluded: ["directory/excluded",
+                                                     "directory/ExcludedFile.swift"])!
         let paths = configuration.lintablePathsForPath("", fileManager: TestFileManager())
         XCTAssertEqual(["directory/File1.swift", "directory/File2.swift"], paths)
     }
@@ -226,7 +220,7 @@ extension String {
 extension XCTestCase {
     var bundlePath: String {
         #if SWIFT_PACKAGE
-            return "Source/SwiftLintFrameworkTests/Resources".absolutePathRepresentation()
+            return "Tests/SwiftLintFramework/Resources".absolutePathRepresentation()
         #else
             return NSBundle(forClass: self.dynamicType).resourcePath!
         #endif

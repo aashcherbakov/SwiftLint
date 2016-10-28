@@ -1,3 +1,284 @@
+## Master
+
+##### Breaking
+
+* None.
+
+##### Enhancements
+
+* Add `SuperCallRule` Opt-In rule that warns about methods not calling to super.  
+  [Angel G. Olloqui](https://github.com/angelolloqui)
+  [#803](https://github.com/realm/SwiftLint/issues/803)
+  
+* Add `RedundantNilCoalesingRule` Opt-In rule that warns against `?? nil`.  
+  [Daniel Beard](https://github.com/daniel-beard)
+  [#764](https://github.com/realm/SwiftLint/issues/764)
+
+* Added opt-In rule to makes closure expressions spacing consistent.  
+  [J. Cheyo Jimenez](https://github.com/masters3d)
+  [#770](https://github.com/realm/SwiftLint/issues/770)
+
+* Adds `allow_private_set` configuration for the `private_outlet` rule.  
+  [Rohan Dhaimade](https://github.com/HaloZero)
+
+* Swift 2.3 support.  
+  [Norio Nomura](https://github.com/norio-nomura),
+  [Syo Ikeda](https://github.com/ikesyo)
+
+* Color literals count as single characters to avoid unintentional line length
+  violations.  
+  [Jonas](https://github.com/VFUC)
+  [#742](https://github.com/realm/SwiftLint/issues/742)
+  
+* Add `SwitchCaseOnNewlineRule' opt-in rule that enforces a newline after
+  `case pattern:` in a `switch`.  
+  [Marcelo Fabri](https://github.com/marcelofabri)
+  [#681](https://github.com/realm/SwiftLint/issues/681)
+
+##### Bug Fixes
+
+* Fixed whitespace being added to TODO messages.  
+  [W. Bagdon](https://github.com/wbagdon)
+  [#792](https://github.com/realm/SwiftLint/issues/792)
+
+* Fixed regex bug in Vertical Whitespace Rule by using SourceKitten instead.
+  The rule now enabled by default again (no longer opt-in).  
+  [J. Cheyo Jimenez](https://github.com/masters3d)
+  [#772](https://github.com/realm/SwiftLint/issues/772)
+
+* Fixed regex bug in Mark Rule where MARK could not be used with only a hyphen
+  but no descriptive text: `// MARK: -`.  
+  [Ruotger Deecke](https://github.com/roddi)
+  [#778](https://github.com/realm/SwiftLint/issues/778)
+
+* Fixed: Private unit test rule not scoped to test classes.  
+  Fixed: Private unit test rule config is ignored if regex is missing.  
+  [Cristian Filipov](https://github.com/cfilipov)
+  [#786](https://github.com/realm/SwiftLint/issues/786)
+
+* Fixed: `ConditionalReturnsOnNewline' now respects severity configuration.  
+  [Rohan Dhaimade](https://github.com/HaloZero)
+  [#783](https://github.com/realm/SwiftLint/issues/783)
+  
+* Fixed: `ConditionalReturnsOnNewline' now checks if `return` is a keyword,
+  avoiding false positives.  
+  [Marcelo Fabri](https://github.com/marcelofabri)
+  [#784](https://github.com/realm/SwiftLint/issues/784)
+
+## 0.12.0: Vertical Laundry
+
+##### Breaking
+
+* Fixed: SwiftLint assumes paths in the YAML config file are relative to the
+  current directory even when `--path` is passed as an argument.  
+  [Cristian Filipov](https://github.com/cfilipov)
+
+##### Enhancements
+
+* None.
+
+##### Bug Fixes
+
+* Made Vertical Whitespace Rule added in 0.11.2 opt-in due to performance
+  issues.  
+  [JP Simard](https://github.com/jpsim)
+  [#772](https://github.com/realm/SwiftLint/issues/772)
+
+## 0.11.2: Communal Clothesline
+
+This release has seen a phenomenal uptake in community contributions!
+
+##### Breaking
+
+* None.
+
+##### Enhancements
+
+* Add `MarkRule` rule to enforce `// MARK` syntax.  
+  [Krzysztof Rodak](https://github.com/krodak)
+  [#749](https://github.com/realm/SwiftLint/issues/749)
+
+* Add `PrivateOutletRule` Opt-In rule to enforce `@IBOutlet`
+  instance variables to be `private`.  
+  [Olivier Halligon](https://github.com/AliSoftware)
+
+* Add content of the todo statement to message.  
+  [J. Cheyo Jimenez](https://github.com/masters3d)
+  [#478](https://github.com/realm/SwiftLint/issues/478)
+
+* Add `LegacyNSGeometryFunctionsRule` rule. Add `NSSize`, `NSPoint`, and
+  `NSRect` constants and constructors to existing rules.  
+  [David Rönnqvist](https://github.com/d-ronnqvist)
+
+* Added Vertical Whitespace Rule.  
+  [J. Cheyo Jimenez](https://github.com/masters3d)
+  [#548](https://github.com/realm/SwiftLint/issues/548)
+
+* Removed ConditionalBindingCascadeRule.  
+  [J. Cheyo Jimenez](https://github.com/masters3d)
+  [#701](https://github.com/realm/SwiftLint/issues/701)
+
+* Allow setting `flexible_right_spacing` configuration for the `colon` rule.  
+  [Shai Mishali](https://github.com/freak4pc)
+  [#730](https://github.com/realm/SwiftLint/issues/730)
+
+* Add Junit reporter.  
+  [Matthew Ellis](https://github.com/matthewellis)
+
+* LeadingWhitespaceRule is now auto correctable.  
+  [masters3d](https://github.com/masters3d)
+
+* Add included regex for custom rules to control what files are processed.  
+  [bootstraponline](https://github.com/bootstraponline)
+  [#689](https://github.com/realm/SwiftLint/issues/689)
+
+* Add rule to check for private unit tests (private unit tests don't get run
+  by XCTest).  
+  [Cristian Filipov](https://github.com/cfilipov)
+
+* Add configuration for setting a warning threshold.  
+  [woodhamgh](https://github.com/woodhamgh)
+  [696](https://github.com/realm/SwiftLint/issues/696)
+
+* Adds 'ConditionalReturnsOnNewLineRule' rule.  
+  [Rohan Dhaimade](https://github.com/HaloZero)
+
+* Made `- returns:` doc optional for initializers.  
+  [Mohpor](https://github.com/mohpor)
+  [#557](https://github.com/realm/SwiftLint/issues/557)
+
+##### Bug Fixes
+
+* Fixed CustomRule Regex.  
+  [J. Cheyo Jimenez](https://github.com/masters3d)
+  [#717](https://github.com/realm/SwiftLint/issues/717)
+  [#726](https://github.com/realm/SwiftLint/issues/726)
+
+* Allow disabling custom rules in code.  
+  [J. Cheyo Jimenez](https://github.com/masters3d)
+  [#515](https://github.com/realm/SwiftLint/issues/515)
+
+* Fix LegacyConstructorRule when using variables instead of numbers.  
+  [Sarr Blaise](https://github.com/bsarr007)
+  [#646](https://github.com/realm/SwiftLint/issues/646)
+
+* Fix force_unwrapping false positive inside strings.  
+  [Daniel Beard](https://github.com/daniel-beard)
+  [#721](https://github.com/realm/SwiftLint/issues/721)
+
+## 0.11.1: Cuddles... Or Else!
+
+##### Breaking
+
+* None.
+
+##### Enhancements
+
+* Added `statement_mode` configuration to  the `statement_position` rule. The   
+  `default` mode keeps the current SwiftLint behavior of keeping `else` and
+  `catch` statements on the same line as the closing brace before them. The
+  `uncuddled_else`configuration requires the `else` and `catch` to be on a new
+  line with the same leading whitespace as the brace.  
+  [Mike Skiba](https://github.com/ateliercw)
+  [#651](https://github.com/realm/SwiftLint/issues/651)
+
+##### Bug Fixes
+
+* Remove extraneous argument label added in LegacyCGGeometryFunctionsRule
+  autocorrect.  
+  [Sarr Blaise](https://github.com/bsarr007)
+  [643](https://github.com/realm/SwiftLint/issues/643)
+
+## 0.11.0: Laundromat Format
+
+##### Breaking
+
+* Now `type_name` allows lowercase enum values to match the Swift API Design
+  Guidelines.  
+  [Jorge Bernal](https://github.com/koke)
+  [#654](https://github.com/realm/SwiftLint/issues/654)
+
+* Embedding frameworks needed by `swiftlint` was moved from
+  SwiftLintFramework Xcode target to the swiftlint target.
+  The `SwiftLintFramework.framework` product built by the
+  SwiftLintFramework target no longer contains unnecessary frameworks or
+  multiple copies of the Swift libraries.  
+  [Norio Nomura](https://github.com/norio-nomura)
+
+##### Enhancements
+
+* Add `--format` option to `autocorrect` command which re-indents Swift files
+  much like pasting into Xcode would. This option isn't currently configurable,
+  but that can change if users request it.  
+  [JP Simard](https://github.com/jpsim)
+
+* Improve error messages for invalid configuration files.  
+  [Brian Hardy](https://github.com/lyricsboy)
+
+* Added the user-configurable option `ignores_empty_lines` to the
+  `trailing_whitespace` rule. It can be used to control whether the
+  `TrailingWhitespaceRule` should report and correct whitespace-indented empty
+  lines. Defaults to `false`. Added unit tests.  
+  [Reimar Twelker](https://github.com/raginmari)
+
+##### Bug Fixes
+
+* Fix false positive in conditional binding cascade violation.  
+  [Norio Nomura](https://github.com/norio-nomura)
+  [#642](https://github.com/realm/SwiftLint/issues/642)
+
+* Another conditional binding fix, this time for enum that has two parameters
+  or an if statement with two case tests.  
+  [Andrew Rahn](https://github.com/paddlefish)
+  [#667](https://github.com/realm/SwiftLint/issues/667)
+
+* Fix regression in CommaRule ignoring violations when the comma is followed
+  by a comment.  
+  [Norio Nomura](https://github.com/norio-nomura)
+  [#683](https://github.com/realm/SwiftLint/issues/683)
+
+## 0.10.0: `laundry-select` edition
+
+##### Breaking
+
+* None.
+
+##### Enhancements
+
+* Now `libclang.dylib` and `sourcekitd.framework` are dynamically loaded at
+  runtime by SourceKittenFramework to use the versions included in the Xcode
+  version specified by `xcode-select -p` or custom toolchains.  
+  [Norio Nomura](https://github.com/norio-nomura)
+  [#167](https://github.com/jpsim/SourceKitten/issues/167)
+
+* Add `LegacyCGGeometryFunctionsRule` rule.  
+  [Sarr Blaise](https://github.com/bsarr007)
+  [#625](https://github.com/realm/SwiftLint/issues/625)
+
+* SwiftLint no longer crashes when SourceKitService crashes.  
+  [Norio Nomura](https://github.com/norio-nomura)
+
+* Rewrite `conditional_binding_cascade` rule.  
+  [Norio Nomura](https://github.com/norio-nomura)
+  [#617](https://github.com/realm/SwiftLint/issues/617)
+
+* Add autocorrect for `ReturnArrowWhitespaceRule`.  
+  [Craig Siemens](https://github.com/CraigSiemens)
+
+##### Bug Fixes
+
+* Failed to launch swiftlint when Xcode.app was placed at non standard path.  
+  [Norio Nomura](https://github.com/norio-nomura)
+  [#593](https://github.com/realm/SwiftLint/issues/593)
+
+* `ClosingBraceRule` no longer triggers across line breaks.  
+  [Josh Friend](https://github.com/joshfriend)
+  [#592](https://github.com/realm/SwiftLint/issues/592)
+
+* `LegacyConstantRule` and `LegacyConstructorRule` failed to `autocorrect`.  
+  [Norio Nomura](https://github.com/norio-nomura)
+  [#623](https://github.com/realm/SwiftLint/issues/623)
+
 ## 0.9.2: Multiple Exhaust Codes
 
 ##### Breaking
@@ -543,7 +824,7 @@
 
 * Add `autocorrect` command to automatically correct certain violations
   (currently only `trailing_newline`, `trailing_semicolon` &
-  `trailing_whitespace`).
+  `trailing_whitespace`).  
   [JP Simard](https://github.com/jpsim)
   [#5](https://github.com/realm/SwiftLint/issues/5)
 

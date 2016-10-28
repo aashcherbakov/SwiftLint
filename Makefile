@@ -2,7 +2,10 @@ TEMPORARY_FOLDER?=/tmp/SwiftLint.dst
 PREFIX?=/usr/local
 BUILD_TOOL?=xcodebuild
 
-XCODEFLAGS=-xcconfig settings-for-all-projects.xcconfig -workspace 'SwiftLint.xcworkspace' -scheme 'swiftlint' DSTROOT=$(TEMPORARY_FOLDER)
+XCODEFLAGS=-workspace 'SwiftLint.xcworkspace' \
+	-scheme 'swiftlint' \
+	DSTROOT=$(TEMPORARY_FOLDER) \
+	OTHER_LDFLAGS=-Wl,-headerpad_max_install_names
 
 BUILT_BUNDLE=$(TEMPORARY_FOLDER)/Applications/swiftlint.app
 SWIFTLINTFRAMEWORK_BUNDLE=$(BUILT_BUNDLE)/Contents/Frameworks/SwiftLintFramework.framework
@@ -16,8 +19,10 @@ OUTPUT_PACKAGE=SwiftLint.pkg
 VERSION_STRING=$(shell agvtool what-marketing-version -terse1)
 COMPONENTS_PLIST=Source/swiftlint/Supporting Files/Components.plist
 
-SWIFT_SNAPSHOT=swift-DEVELOPMENT-SNAPSHOT-2016-02-03-a
-SWIFT_BUILD_COMMAND=/Library/Developer/Toolchains/$(SWIFT_SNAPSHOT).xctoolchain/usr/bin/swift build
+SWIFT_SNAPSHOT=swift-DEVELOPMENT-SNAPSHOT-2016-04-12-a
+SWIFT_COMMAND=/Library/Developer/Toolchains/$(SWIFT_SNAPSHOT).xctoolchain/usr/bin/swift
+SWIFT_BUILD_COMMAND=$(SWIFT_COMMAND) build
+SWIFT_TEST_COMMAND=$(SWIFT_COMMAND) test
 
 .PHONY: all bootstrap clean install package test uninstall
 
@@ -33,7 +38,9 @@ test: clean bootstrap
 clean:
 	rm -f "$(OUTPUT_PACKAGE)"
 	rm -rf "$(TEMPORARY_FOLDER)"
-	$(BUILD_TOOL) $(XCODEFLAGS) clean
+	$(BUILD_TOOL) $(XCODEFLAGS) -configuration Debug clean
+	$(BUILD_TOOL) $(XCODEFLAGS) -configuration Release clean
+	$(BUILD_TOOL) $(XCODEFLAGS) -configuration Test clean
 
 install: uninstall package
 	sudo installer -pkg SwiftLint.pkg -target /
@@ -58,6 +65,14 @@ prefix_install: installables
 	install_name_tool -rpath "/Library/Frameworks/SwiftLintFramework.framework/Versions/Current/Frameworks" "@executable_path/../Frameworks/SwiftLintFramework.framework/Versions/Current/Frameworks" "$(PREFIX)/bin/swiftlint"
 	install_name_tool -rpath "/Library/Frameworks" "@executable_path/../Frameworks" "$(PREFIX)/bin/swiftlint"
 
+portable_zip: installables
+	cp -Rf "$(TEMPORARY_FOLDER)$(FRAMEWORKS_FOLDER)/SwiftLintFramework.framework" "$(TEMPORARY_FOLDER)"
+	cp -f "$(TEMPORARY_FOLDER)$(BINARIES_FOLDER)/swiftlint" "$(TEMPORARY_FOLDER)"
+	install_name_tool -rpath "/Library/Frameworks/SwiftLintFramework.framework/Versions/Current/Frameworks" "@executable_path/SwiftLintFramework.framework/Versions/Current/Frameworks" "$(TEMPORARY_FOLDER)/swiftlint"
+	install_name_tool -rpath "/Library/Frameworks" "@executable_path" "$(TEMPORARY_FOLDER)/swiftlint"
+	rm -f "./portable_swiftlint.zip"
+	(cd "$(TEMPORARY_FOLDER)"; zip -yr - "swiftlint" "SwiftLintFramework.framework") > "./portable_swiftlint.zip"
+
 package: installables
 	pkgbuild \
 		--component-plist "$(COMPONENTS_PLIST)" \
@@ -81,17 +96,15 @@ swift_snapshot_install:
 	curl https://swift.org/builds/development/xcode/$(SWIFT_SNAPSHOT)/$(SWIFT_SNAPSHOT)-osx.pkg -o swift.pkg
 	sudo installer -pkg swift.pkg -target /
 
-spm_bootstrap: spm_teardown
-	curl https://raw.githubusercontent.com/jpsim/SourceKitten/master/script/spm_bootstrap | bash -s $(SWIFT_SNAPSHOT)
-
-spm_teardown:
-	curl https://raw.githubusercontent.com/jpsim/SourceKitten/master/script/spm_teardown | bash
-
+# Use Xcode's swiftc
+spm: export SWIFT_EXEC=$(shell TOOLCHAINS= xcrun -find swiftc)
 spm:
 	$(SWIFT_BUILD_COMMAND)
 
+# Use Xcode's swiftc
+spm_test: export SWIFT_EXEC=$(shell TOOLCHAINS= xcrun -find swiftc)
 spm_test: spm
-	.build/Debug/SwiftLintFrameworkTests
+	$(SWIFT_TEST_COMMAND)
 
 spm_clean:
 	$(SWIFT_BUILD_COMMAND) --clean

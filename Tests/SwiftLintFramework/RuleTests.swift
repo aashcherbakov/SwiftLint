@@ -14,33 +14,12 @@ struct RuleWithLevelsMock: ConfigurationProviderRule {
     var configuration = SeverityLevelsConfiguration(warning: 2, error: 3)
 
     static let description = RuleDescription(identifier: "severity_level_mock",
-        name: "",
-        description: "")
+                                             name: "",
+                                             description: "")
     func validateFile(file: File) -> [StyleViolation] { return [] }
 }
 
 class RuleTests: XCTestCase {
-
-    // protocol XCTestCaseProvider
-    lazy var allTests: [(String, () throws -> Void)] = [
-        ("testRuleIsEqualTo", self.testRuleIsEqualTo),
-        ("testRuleIsNotEqualTo", self.testRuleIsNotEqualTo),
-        ("testRuleArraysWithDifferentCountsNotEqual",
-            self.testRuleArraysWithDifferentCountsNotEqual),
-        ("testSeverityLevelRuleInitsWithConfigDictionary",
-            self.testSeverityLevelRuleInitsWithConfigDictionary),
-        ("testSeverityLevelRuleInitsWithWarningOnlyConfigDictionary",
-            self.testSeverityLevelRuleInitsWithWarningOnlyConfigDictionary),
-        ("testSeverityLevelRuleInitsWithErrorOnlyConfigDictionary",
-            self.testSeverityLevelRuleInitsWithErrorOnlyConfigDictionary),
-        ("testSeverityLevelRuleInitsWithConfigArray",
-            self.testSeverityLevelRuleInitsWithConfigArray),
-        ("testSeverityLevelRuleInitsWithSingleValueConfigArray",
-            self.testSeverityLevelRuleInitsWithSingleValueConfigArray),
-        ("testSeverityLevelRuleInitsWithLiteral", self.testSeverityLevelRuleInitsWithLiteral),
-        ("testSeverityLevelRuleNotEqual", self.testSeverityLevelRuleNotEqual),
-        ("testDifferentSeverityLevelRulesNotEqual", self.testDifferentSeverityLevelRulesNotEqual),
-    ]
 
     private struct RuleMock1: Rule {
         init() {}
@@ -66,8 +45,8 @@ class RuleTests: XCTestCase {
         var configuration = SeverityLevelsConfiguration(warning: 2, error: 3)
 
         static let description = RuleDescription(identifier: "violation_level_mock2",
-            name: "",
-            description: "")
+                                                 name: "",
+                                                 description: "")
         func validateFile(file: File) -> [StyleViolation] { return [] }
     }
 

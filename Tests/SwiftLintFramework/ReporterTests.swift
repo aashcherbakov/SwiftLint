@@ -11,14 +11,6 @@ import XCTest
 
 class ReporterTests: XCTestCase {
 
-    // protocol XCTestCaseProvider
-    lazy var allTests: [(String, () throws -> Void)] = [
-        ("testXcodeReporter", self.testXcodeReporter),
-        ("testJSONReporter", self.testJSONReporter),
-        ("testCSVReporter", self.testCSVReporter),
-        ("testCheckstyleReporter", self.testCheckstyleReporter),
-    ]
-
     func generateViolations() -> [StyleViolation] {
         let location = Location(file: "filename", line: 1, character: 2)
         return [
@@ -84,6 +76,19 @@ class ReporterTests: XCTestCase {
             "\t<file name=\"filename\">\n\t\t<error line=\"1\" column=\"2\" severity=\"error\" " +
             "message=\"Violation Reason.\"/>\n\t</file>\n" +
             "</checkstyle>"
+        )
+    }
+
+    func testJunitReporter() {
+        XCTAssertEqual(
+            JUnitReporter.generateReport(generateViolations()),
+            "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<testsuites><testsuite>\n" +
+                "\t<testcase classname=\'Formatting Test\' name=\'filename\'>\n" +
+                    "<failure message=\'Violation Reason.\'>warning:\nLine:1 </failure>" +
+                "\t</testcase>\n" +
+                "\t<testcase classname=\'Formatting Test\' name=\'filename\'>\n" +
+                    "<failure message=\'Violation Reason.\'>error:\nLine:1 </failure>" +
+                "\t</testcase>\n</testsuite></testsuites>"
         )
     }
 }

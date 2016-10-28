@@ -14,6 +14,7 @@ public struct RegexConfiguration: RuleConfiguration, Equatable {
     public var name: String?
     public var message = "Regex matched."
     public var regex = NSRegularExpression()
+    public var included = NSRegularExpression()
     public var matchKinds = Set(SyntaxKind.allKinds())
     public var severityConfiguration = SeverityConfiguration(.Warning)
 
@@ -27,8 +28,8 @@ public struct RegexConfiguration: RuleConfiguration, Equatable {
 
     public var description: RuleDescription {
         return RuleDescription(identifier: identifier,
-            name: name ?? identifier,
-            description: "")
+                               name: name ?? identifier,
+                               description: "")
     }
 
     public init(identifier: String) {
@@ -37,11 +38,15 @@ public struct RegexConfiguration: RuleConfiguration, Equatable {
 
     public mutating func applyConfiguration(configuration: AnyObject) throws {
         guard let configurationDict = configuration as? [String: AnyObject],
-              let regexString = configurationDict["regex"] as? String else {
-            throw ConfigurationError.UnknownConfiguration
+            regexString = configurationDict["regex"] as? String else {
+                throw ConfigurationError.UnknownConfiguration
         }
 
         regex = try NSRegularExpression.cached(pattern: regexString)
+
+        if let includedString = configurationDict["included"] as? String {
+            included = try NSRegularExpression.cached(pattern: includedString)
+        }
 
         if let name = configurationDict["name"] as? String {
             self.name = name
@@ -62,6 +67,7 @@ public func == (lhs: RegexConfiguration, rhs: RegexConfiguration) -> Bool {
     return lhs.identifier == rhs.identifier &&
            lhs.message == rhs.message &&
            lhs.regex == rhs.regex &&
+           lhs.included.pattern == rhs.included.pattern &&
            lhs.matchKinds == rhs.matchKinds &&
            lhs.severity == rhs.severity
 }

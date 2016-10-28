@@ -14,7 +14,7 @@ private let whitespaceAndNewlineCharacterSet = NSCharacterSet.whitespaceAndNewli
 extension File {
     private func violatingClosingBraceRanges() -> [NSRange] {
         return matchPattern(
-            "(\\}\\s+\\))",
+            "(\\}[ \\t]+\\))",
             excludingSyntaxKinds: SyntaxKind.commentAndStringKinds()
         )
     }
@@ -32,10 +32,12 @@ public struct ClosingBraceRule: CorrectableRule, ConfigurationProviderRule {
         description: "Closing brace with closing parenthesis " +
                      "should not have any whitespaces in the middle.",
         nonTriggeringExamples: [
-            "[].map({ })"
+            "[].map({ })",
+            "[].map(\n  { }\n)"
         ],
         triggeringExamples: [
-            "[].map({ ↓} )"
+            "[].map({ ↓} )",
+            "[].map({ }\t)"
         ],
         corrections: [
             "[].map({ } )\n": "[].map({ })\n"

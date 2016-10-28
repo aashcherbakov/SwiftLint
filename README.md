@@ -13,6 +13,10 @@ of your source files for more accurate results.
 
 ![](assets/screenshot.png)
 
+This project adheres to the [Contributor Covenant Code of Conduct](https://realm.io/conduct).
+By participating, you are expected to uphold this code. Please report
+unacceptable behavior to [info@realm.io](mailto:info@realm.io).
+
 ## Installation
 
 Using [Homebrew](http://brew.sh/)
@@ -44,6 +48,11 @@ fi
 ```
 
 ![](assets/runscript.png)
+
+#### Format on Save Xcode Plugin
+
+To run `swiftlint autocorrect` on save in Xcode, install the
+[SwiftLintXcode](https://github.com/ypresto/SwiftLintXcode) plugin from Alcatraz.
 
 ### Atom
 
@@ -81,7 +90,7 @@ These are same environment variables set for input files to
 ## Rules
 
 There are only a small number of rules currently implemented, but we hope the
-Swift community (that's you!) will contribute more over time. Pull requests are
+Swift community (that's you!) will contribute more over time. [Pull requests](CONTRIBUTING.md) are
 encouraged.
 
 The rules that *are* currently implemented are mostly there as a starting point
@@ -191,7 +200,7 @@ variable_name:
     - id
     - URL
     - GlobalAPIKey
-reporter: "csv" # reporter type (xcode, json, csv, checkstyle)
+reporter: "xcode" # reporter type (xcode, json, csv, checkstyle, junit)
 ```
 
 #### Defining Custom Rules
@@ -202,6 +211,7 @@ following syntax:
 ```yaml
 custom_rules:
   pirates_beat_ninjas: # rule identifier
+    included: ".*.swift" # regex that defines paths to include during linting. optional.
     name: "Pirates Beat Ninjas" # rule name. optional.
     regex: "([n,N]inja)" # matching pattern
     match_kinds: # SyntaxKinds to match. optional.
@@ -247,13 +257,12 @@ are all the possible syntax kinds:
 SwiftLint supports nesting configuration files for more granular control over
 the linting process.
 
-* Set the `use_nested_configs: true` value in your root `.swiftlint.yml` file
 * Include additional `.swiftlint.yml` files where necessary in your directory
   structure.
 * Each file will be linted using the configuration file that is in its
   directory or at the deepest level of its parent directories. Otherwise the
   root configuration will be used.
-* `excluded`, `included`, and `use_nested_configs` are ignored for nested
+* `excluded` and `included` are ignored for nested
   configurations.
 
 ### Auto-correct
@@ -271,3 +280,15 @@ applying corrections.
 ## License
 
 MIT licensed.
+
+## About
+
+<img src="assets/realm.png" width="184" />
+
+SwiftLint is maintained and funded by Realm Inc. The names and logos for
+Realm are trademarks of Realm Inc.
+
+We :heart: open source software!
+See [our other open source projects](https://github.com/realm),
+read [our blog](https://realm.io/news) or say hi on twitter
+([@realm](https://twitter.com/realm)).

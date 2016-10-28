@@ -9,11 +9,12 @@
 import SourceKittenFramework
 
 public protocol ASTRule: Rule {
-    func validateFile(file: File, kind: SwiftDeclarationKind,
+    associatedtype KindType: RawRepresentable
+    func validateFile(file: File, kind: KindType,
                       dictionary: [String: SourceKitRepresentable]) -> [StyleViolation]
 }
 
-extension ASTRule {
+extension ASTRule where KindType.RawValue == String {
     public func validateFile(file: File) -> [StyleViolation] {
         return validateFile(file, dictionary: file.structure.dictionary)
     }
@@ -23,8 +24,8 @@ extension ASTRule {
         let substructure = dictionary["key.substructure"] as? [SourceKitRepresentable] ?? []
         return substructure.flatMap { subItem -> [StyleViolation] in
             guard let subDict = subItem as? [String: SourceKitRepresentable],
-                let kindString = subDict["key.kind"] as? String,
-                let kind = SwiftDeclarationKind(rawValue: kindString) else {
+                kindString = subDict["key.kind"] as? String,
+                kind = KindType(rawValue: kindString) else {
                     return []
             }
             return self.validateFile(file, dictionary: subDict) +
